@@ -1,5 +1,5 @@
 from django.http import HttpResponse, HttpResponseNotFound, Http404
-from django.shortcuts import render
+from django.shortcuts import render, get_object_or_404
 from .models import Movie, Category
 
 menu = [
@@ -13,10 +13,8 @@ menu = [
 
 def index(request):
     movies = Movie.objects.all()
-    categories = Category.objects.all()
     context = {
         'menu': menu,
-        'categories':categories,
         'movies': movies,
         'title': 'glavnaya stranica',
         'category_selected': 0
@@ -40,19 +38,25 @@ def login(request):
     pass
 
 def show_movie(request, movie_id):
-    pass
+    movie = get_object_or_404(Movie, pk=movie_id)
+    context = {
+        'movie': movie,
+        'menu': menu,
+        'title': movie.name,
+        'category_selected': movie.category_id,
+    }
+    return render(request, 'cinema/movie.html', context=context)
+
 
 def show_category(request, category_id):
     movies = Movie.objects.filter(category_id=category_id)
-    categories = Category.objects.all()
     if not len(movies):
         raise Http404()
 
     context = {
         'menu': menu,
-        'categories': categories,
         'movies': movies,
-        'title': f'{categories[category_id-1].name}',
+        'title': movies[0].category.name,
         'category_selected': category_id,
     }
     return render(request, 'cinema/index.html', context=context)

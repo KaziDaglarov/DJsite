@@ -19,6 +19,7 @@ class Movie(models.Model):
     class Meta:
         verbose_name = 'Фильмы'
         verbose_name_plural = 'Фильмы'
+        ordering = ['name']
 
 class Category(models.Model):
     name = models.CharField(max_length=50, db_index=True)
@@ -28,3 +29,7 @@ class Category(models.Model):
 
     def get_absolute_url(self):
         return reverse('category', kwargs={'category_id': self.pk})
+    class Meta:
+        verbose_name = 'Категории'
+        verbose_name_plural = 'Категории'
+        ordering = ['name']

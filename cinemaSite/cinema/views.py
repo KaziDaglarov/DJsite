@@ -1,29 +1,27 @@
 from django.http import HttpResponse, HttpResponseNotFound, Http404
 from django.shortcuts import render, get_object_or_404, redirect
+from django.urls import reverse_lazy
+
 from .models import Movie, Category
-from django.views.generic import ListView
+from django.views.generic import ListView, DetailView, CreateView
 from .forms import *
-
-menu = [
-    {'title':'О сайте', 'url_name':'about'},
-    {'title':'Добавить фильм', 'url_name':'addMovies'},
-    {'title':'Сериалы', 'url_name':'series'},
-    {'title':'Войти', 'url_name':'login'},
-]
+from .utils import *
+from django.contrib.auth.mixins import  LoginRequiredMixin
 
 
-class MovieHome(ListView):
+
+
+class MovieHome(DataMixin, ListView):
     model = Movie
+    template_name = 'cinema/index.html'
+    context_object_name = 'movies'
 
-# def index(request):
-#     movies = Movie.objects.all()
-#     context = {
-#         'menu': menu,
-#         'movies': movies,
-#         'title': 'glavnaya stranica',
-#         'category_selected': 0
-#     }
-#     return render(request, 'cinema/index.html', context=context)
+    def get_context_data(self, *, object_list=None, **kwargs):
+        context = super().get_context_data(**kwargs)
+        c_def = self.get_user_context(title='Главная страница')
+        return dict(list(context.items()) + list(c_def.items()))
+    def get_queryset(self):
+        return Movie.objects.filter(is_published=True)
 
 
 def about(request):
@@ -32,16 +30,19 @@ def about(request):
 def pageNotFound(request, exceptions):
     return HttpResponseNotFound('<h1> Ne naydeno</h1>')
 
-def addMovies(request):
-    if request.method=='POST':
-        form = AddMovieForm(request.POST, request.FILES)
-        if form.is_valid():
-            form.save()
-            return redirect('home')
+class AddMovie(LoginRequiredMixin, DataMixin, CreateView):
+    form_class = AddMovieForm
+    template_name = 'cinema/addmovie.html'
+    success_url = reverse_lazy('home')
+    login_url = reverse_lazy('home')
 
-    else:
-        form = AddMovieForm()
-    return render(request, 'cinema/addmovie.html', {'form': form, 'menu': menu, 'title': 'Добавление статьи'})
+    def get_context_data(self, *, object_list=None, **kwargs):
+        context = super().get_context_data(**kwargs)
+        c_def = self.get_user_context(title='Добавление страницы')
+        return dict(list(context.items()) + list(c_def.items()))
+
+
+
 
 def series(request):
     pass
@@ -49,26 +50,29 @@ def series(request):
 def login(request):
     pass
 
-def show_movie(request, movie_slug):
-    movie = get_object_or_404(Movie, slug=movie_slug)
-    context = {
-        'movie': movie,
-        'menu': menu,
-        'title': movie.name,
-        'category_selected': movie.category.slug,
-    }
-    return render(request, 'cinema/movie.html', context=context)
+
+class MovieShow(DataMixin, DetailView):
+    model = Movie
+    template_name = 'cinema/movie.html'
+    slug_url_kwarg = 'movie_slug'
+    context_object_name = 'movie'
+    def get_context_data(self, *, object_list=None, **kwargs):
+        context = super().get_context_data(**kwargs)
+        c_def = self.get_user_context(title=context['movie'])
+        return dict(list(context.items()) + list(c_def.items()))
 
 
-def show_category(request, category_slug):
-    movies = Movie.objects.filter(category__slug=category_slug)
-    if not len(movies):
-        raise Http404()
 
-    context = {
-        'menu': menu,
-        'movies': movies,
-        'title': movies[0].category.name,
-        'category_selected': category_slug,
-    }
-    return render(request, 'cinema/index.html', context=context)
+class MovieCategory(DataMixin, ListView):
+    model = Category
+    template_name = 'cinema/index.html'
+    context_object_name = 'movies'
+
+    def get_queryset(self):
+        return Movie.objects.filter(category__slug=self.kwargs['category_slug'], is_published=True)
+
+    def get_context_data(self, *, object_list=None, **kwargs):
+        context = super().get_context_data(**kwargs)
+        c_def = self.get_user_context(title='Категория - ' + str(context['movies'][0].category),
+                                      category_selected=context['movies'][0].category_id)
+        return dict(list(context.items()) + list(c_def.items()))

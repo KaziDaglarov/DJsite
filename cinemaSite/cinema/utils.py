@@ -5,10 +5,10 @@ menu = [
     {'title':'О сайте', 'url_name':'about'},
     {'title':'Добавить фильм', 'url_name':'addMovies'},
     {'title':'Сериалы', 'url_name':'series'},
-    {'title':'Войти', 'url_name':'login'},
 ]
 
 class DataMixin():
+    paginate_by = 2
     def get_user_context(self, **kwargs):
         context = kwargs
         categories = Category.objects.annotate(Count('movie'))

@@ -16,6 +16,7 @@ class MovieHome(DataMixin, ListView):
     template_name = 'cinema/index.html'
     context_object_name = 'movies'
 
+
     def get_context_data(self, *, object_list=None, **kwargs):
         context = super().get_context_data(**kwargs)
         c_def = self.get_user_context(title='Главная страница')
@@ -67,6 +68,7 @@ class MovieCategory(DataMixin, ListView):
     model = Category
     template_name = 'cinema/index.html'
     context_object_name = 'movies'
+
 
     def get_queryset(self):
         return Movie.objects.filter(category__slug=self.kwargs['category_slug'], is_published=True)

@@ -20,7 +20,7 @@ class Movie(models.Model):
     class Meta:
         verbose_name = 'Фильмы'
         verbose_name_plural = 'Фильмы'
-        ordering = ['name']
+        ordering = ['id']
 
 class Category(models.Model):
     name = models.CharField(max_length=50, db_index=True)

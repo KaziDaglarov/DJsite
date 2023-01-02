@@ -9,7 +9,7 @@ urlpatterns = [
     path('addmovies/', AddMovie.as_view(), name='addMovies'),
     path('series/', series, name='series'),
     path('login/', login, name='login'),
-    path('register/', register, name='register'),
+    path('register/', RegisterUser.as_view(), name='register'),
     path('movie/<slug:movie_slug>/', MovieShow.as_view(), name='movie'),
     path('category/<slug:category_slug>/', MovieCategory.as_view(), name='category'),
 

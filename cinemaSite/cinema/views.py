@@ -1,3 +1,4 @@
+
 from django.http import HttpResponse, HttpResponseNotFound, Http404
 from django.shortcuts import render, get_object_or_404, redirect
 from django.urls import reverse_lazy
@@ -77,4 +78,14 @@ class MovieCategory(DataMixin, ListView):
         context = super().get_context_data(**kwargs)
         c_def = self.get_user_context(title='Категория - ' + str(context['movies'][0].category),
                                       category_selected=context['movies'][0].category_id)
+        return dict(list(context.items()) + list(c_def.items()))
+
+class RegisterUser(DataMixin, CreateView):
+    form_class = RegisterUserForm
+    template_name = 'cinema/register.html'
+    success_url = reverse_lazy('login')
+
+    def get_context_data(self, *, object_list=None, **kwargs):
+        context = super().get_context_data(**kwargs)
+        c_def = self.get_user_context(title='Регистрация')
         return dict(list(context.items()) + list(c_def.items()))

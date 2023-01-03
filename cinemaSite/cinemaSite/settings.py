@@ -39,6 +39,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'cinema.apps.CinemaConfig',
     "debug_toolbar",
+    'captcha'
 ]
 
 MIDDLEWARE = [
@@ -135,3 +136,10 @@ INTERNAL_IPS = [
     "127.0.0.1",
     # ...
 ]
+
+CACHES = {
+    'default': {
+        'BACKEND': 'django.core.cache.backends.filebased.FileBasedCache',
+        'LOCATION': os.path.join(BASE_DIR, 'cinemaSite_cache'),
+    }
+}

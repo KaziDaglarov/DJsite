@@ -6,7 +6,7 @@ from django.shortcuts import render, get_object_or_404, redirect
 from django.urls import reverse_lazy
 
 from .models import Movie, Category
-from django.views.generic import ListView, DetailView, CreateView
+from django.views.generic import ListView, DetailView, CreateView, FormView
 from .forms import *
 from .utils import *
 from django.contrib.auth.mixins import  LoginRequiredMixin
@@ -48,8 +48,20 @@ class AddMovie(LoginRequiredMixin, DataMixin, CreateView):
 
 
 
-def series(request):
-    pass
+class ContactFormView(FormView, DataMixin):
+    template_name = 'cinema/contact.html'
+    success_url = reverse_lazy('home')
+    form_class = ContactForm
+
+    def get_context_data(self, *, object_list=None, **kwargs):
+        context = super().get_context_data(**kwargs)
+        c_def = self.get_user_context(title='Обратная связь')
+        return dict(list(context.items()) + list(c_def.items()))
+
+
+    def form_valid(self, form):
+        print(form.cleaned_data)
+        return redirect('home')
 
 
 

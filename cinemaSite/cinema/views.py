@@ -25,7 +25,7 @@ class MovieHome(DataMixin, ListView):
         c_def = self.get_user_context(title='Главная страница')
         return dict(list(context.items()) + list(c_def.items()))
     def get_queryset(self):
-        return Movie.objects.filter(is_published=True)
+        return Movie.objects.filter(is_published=True).select_related('category')
 
 
 def about(request):
@@ -72,12 +72,13 @@ class MovieCategory(DataMixin, ListView):
 
 
     def get_queryset(self):
-        return Movie.objects.filter(category__slug=self.kwargs['category_slug'], is_published=True)
+        return Movie.objects.filter(category__slug=self.kwargs['category_slug'], is_published=True).select_related('category')
 
     def get_context_data(self, *, object_list=None, **kwargs):
         context = super().get_context_data(**kwargs)
-        c_def = self.get_user_context(title='Категория - ' + str(context['movies'][0].category),
-                                      category_selected=context['movies'][0].category_id)
+        c = Category.objects.get(slug=self.kwargs['category_slug'])
+        c_def = self.get_user_context(title='Категория - ' + str(c.name),
+                                      category_selected=c.pk)
         return dict(list(context.items()) + list(c_def.items()))
 
 class RegisterUser(DataMixin, CreateView):
